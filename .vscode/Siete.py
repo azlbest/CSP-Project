@@ -18,13 +18,16 @@ opponentCards = []
 turn = 1
 uno_state = False
 penalty = False
+tk_images = []
 
-numList = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39]
-cardList = [["red","1"],["red","2"],["red","3"],["red","4"],["red","5"],["red","6"],["red","7"],["red","8"],["red","9"],["red","0"]
-            ,["green","1"],["green","2"],["green","3"],["green","4"],["green","5"],["green","6"],["green","7"],["green","8"],["green","9"],["green","0"]
-            ,["blue","1"],["blue","2"],["blue","3"],["blue","4"],["blue","5"],["blue","6"],["blue","7"],["blue","8"],["blue","9"],["blue","0"]
-            ,["yellow","1"],["yellow","2"],["yellow","3"],["yellow","4"],["yellow","5"],["yellow","6"],["yellow","7"],["yellow","8"],["yellow","9"],["yellow","0"]]
-
+numList = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75]
+random.shuffle(numList)
+cardList = [["red","1"],["red","2"],["red","3"],["red","4"],["red","5"],["red","6"],["red","7"],["red","8"],["red","9"],["red","1"],["red","2"],["red","3"],["red","4"],["red","5"],["red","6"],["red","7"],["red","8"],["red","9"],["red","0"]
+            ,["green","1"],["green","2"],["green","3"],["green","4"],["green","5"],["green","6"],["green","7"],["green","8"],["green","9"],["green","1"],["green","2"],["green","3"],["green","4"],["green","5"],["green","6"],["green","7"],["green","8"],["green","9"],["green","0"]
+            ,["blue","1"],["blue","2"],["blue","3"],["blue","4"],["blue","5"],["blue","6"],["blue","7"],["blue","8"],["blue","9"],["blue","1"],["blue","2"],["blue","3"],["blue","4"],["blue","5"],["blue","6"],["blue","7"],["blue","8"],["blue","9"],["blue","0"]
+            ,["yellow","1"],["yellow","2"],["yellow","3"],["yellow","4"],["yellow","5"],["yellow","6"],["yellow","7"],["yellow","8"],["yellow","9"],["yellow","1"],["yellow","2"],["yellow","3"],["yellow","4"],["yellow","5"],["yellow","6"],["yellow","7"],["yellow","8"],["yellow","9"],["yellow","0"]]
+for i in range(76):
+    cardList[i].append(i)
 #The card at the top of the pile
 index = random.choice(numList)
 topCard = cardList[index]
@@ -64,6 +67,8 @@ def opmove():
     global turn
     global topCard
     global uno_state
+    global tk_images
+    global numList
     for i in range(len(opponentCards)):
         if opponentCards[i][0] == topCard[0] or opponentCards[i][1] == topCard[1]:
             uno_state = False
@@ -71,9 +76,11 @@ def opmove():
             btn = buttonList[index]
             btn.grid(row=2,column=4)
             btn.lift()
+            numList.append(index)
             topCard = opponentCards[i]
-            opimg = ImageTk.PhotoImage(generate_card(opponentCards[i]))
-            btn.configure(image = opimg)
+            opindex = cardList.index(opponentCards[i])
+            btn.configure(image = tk_images[index][0])
+            btn.image = tk_image
             for j in range(len(opponentCards)-(i+1)):
                 crd = cardList.index(opponentCards[len(opponentCards)-(j+1)])
                 btn = buttonList[crd]
@@ -116,17 +123,20 @@ def playCard(card, button):
     global topCard
     global turn
     global uno_state
+    global numList
     row = int(button.grid_info()['row'])
     column = int(button.grid_info()['column'])
     uno_state = False
     if card[0] == topCard[0] or card[1] == topCard[1]:
-        if card[0] != topCard[0] or card[1] != topCard[1]:
+        if str(card[2]) != topCard[0]:
             if turn == 1:
+                index = cardList.index(card)
                 button.grid(row=2,column=4)
                 button.lift()
+                numList.append(index)
                 topCard = card
-                index = playerCards.index(card)
-                for i in range(len(playerCards)-(index+1)):
+                index2 = playerCards.index(card)
+                for i in range(len(playerCards)-(index2+1)):
                     crd = cardList.index(playerCards[len(playerCards)-(i+1)])
                     btn = buttonList[crd]
                     btn.grid(row=3, column = len(playerCards)-(i+1))
@@ -146,9 +156,9 @@ def drawCard(player,num):
     global uno_state
     if (player == playerCards and turn == 1) or (player == opponentCards and turn == 2):
         if len(numList) > 0:
-            index = random.choice(numList)
+            index = numList[0]
             if player == opponentCards:
-                buttonList[index].configure(image = tk_image[1])
+                buttonList[index].configure(image = tk_images[index][1])
             buttonList[index].grid(row=num,column=len(player)+1, sticky='w')
             player.append(cardList[index])
             if not(cardList[index][0] == topCard[0] or cardList[index][1] == topCard[1]) and not uno_state and not penalty:
@@ -192,12 +202,13 @@ deck.grid(row=2,column=1)
 unoButton = tk.Button(root, text="Siete!", font=("arial", 20), bg="red", fg="white",command=lambda: call_uno())
 unoButton.grid(row=2, column=6)
 #Creates all the cards
-for i in range(40):
+for i in range(76):
     tk_image = [ImageTk.PhotoImage(generate_card(cardList[i])),ImageTk.PhotoImage(backside())]
     button = tk.Button(root, image = tk_image[0])
     button.configure(command=lambda c=cardList[i], b=button: playCard(c, b))
     button.image = tk_image
     buttonList.append(button)
+    tk_images.append(tk_image)
 #Creates the grid for all the widgets to be placed
 for i in range(10):
     root.grid_rowconfigure(i, weight=1)
